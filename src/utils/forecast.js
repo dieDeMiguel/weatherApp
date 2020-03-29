@@ -11,7 +11,8 @@ const forecast = (latitude, longitude, callback) => {
                 message:  body.error
             }, undefined);
         } else {
-            callback(undefined, body.daily.data[0].summary + ' It is currently ' + body.currently.temperature + ' degress out, there is a ' + body.currently.precipProbability + '% chance of rain');
+            callback(undefined, body.daily.data[0].summary + ' It is currently ' + body.currently.temperature + ' degress out, there is a ' + body.currently.precipProbability + 
+            '% chance of rain. The wind Speed is '+ body.currently.windSpeed + 'km/h and the pressure is ' + body.currently.pressure + 'HPa.' );
         }
     })
 }
