@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const app = express();
 const hbs = require('hbs');
-const geocode = require('./utils/geocode');
+const {geocode, geocodeLocation} = require('./utils/geocode');
 const forecast = require('./utils/forecast');
 
 const port = process.env.PORT || 3000;
@@ -50,10 +50,11 @@ app.get('/weather', (req, res) => {
             message: 'You must provide an adress'
         });
     }
-    geocode(req.query.address, (error, {latitude, longitude, location} = {}) => {
+    geocodeLocation(req.query.address, (error, {latitude, longitude, location} = {}) => {
         if(error) {
             return res.send({error});
         }
+       
         forecast(latitude, longitude, (error, forecastData) => {
             if(error) {
                 return res.send({error});
@@ -67,16 +68,52 @@ app.get('/weather', (req, res) => {
     });
 });
 
-app.get('/products', (req, res) => {
-    if(!req.query.search) {
-        return res.send({
-            message: 'You must provide a search criteria'
+app.get('/weatherbutton', (req, res) => {
+    geocodeLocation(req.query.longitude, req.query.latitude, (error, location) => {
+        if(error) {
+            return res.send({error})
+        }
+        forecast(req.query.latitude, req.query.longitude, (error, forecastData) => {
+            res.send({
+                forecast: forecastData,
+                location
+            })
         })
-    };
-    console.log(req.query.search);
-    res.send({
-        products: []
-    });
+    })
+   
+//     if(!req.query.latitude && !req.query.longitude) {
+//         return res.send({
+//             message: 'Something went wrong with the GPS services'
+//         });
+//     }
+//     geocode(req.query.longitude, req.query.latitude, (error, {latitude, longitude, location} = {}) => {
+//         if(error) {
+//             return res.send({error});
+//         }
+       
+//         forecast(req.query.latitude, req.query.longitude, (error, forecastData) => {
+//             if(error) {
+//                 return res.send({error});
+//             }
+//             res.send({
+//                 addres: req.query.address,
+//                 location,
+//                 forecast: forecastData
+//             })
+//         })
+//     });
+// });
+
+// app.get('/products', (req, res) => {
+//     if(!req.query.search) {
+//         return res.send({
+//             message: 'You must provide a search criteria'
+//         })
+//     };
+//     console.log(req.query.search);
+//     res.send({
+//         products: []
+//     });
 })
 
 app.get('/help/*', (req, res) => {
@@ -94,6 +131,7 @@ app.get('*', (req, res) => {
         name: 'Diego'
     });
 });
+
 
 app.listen(port, ()=> {
     console.log("Server is up and running on port 3000");

@@ -18,5 +18,25 @@ const geocode = (adress, callback) =>{
     })
 }
 
+const geocodeLocation = (longitude, latitude, callback) => {
+    const url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(longitude) + ',' + encodeURIComponent(latitude) + '.json?access_token=pk.eyJ1IjoiZGllZGVtaWd1ZWwiLCJhIjoiY2s4NzF1cWU3MDZ1azNpcGpoOXB4a2NxcSJ9.p-luPuLfEStw_m2d-M7ajQ&limit=1'
 
-module.exports = geocode;
+    request({ url, json: true }, (error, { body }) => {
+        if(error){
+            callback('Unable to connect to location services!', undefined);
+        } else if(body.features.length === 0){
+            callback({error: 'Unable to find location. Try another search.'}, undefined);
+        } else {
+            callback(undefined, {
+                location: body.features[0].place_name
+            });
+        }
+    })
+
+}
+
+
+module.exports = {
+    geocode,
+    geocodeLocation
+}
